@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+    id "org.mikeneck.graalvm-native-image" version "0.5.0"
+    id 'com.palantir.git-version' version '0.12.3'
+}
+
+group 'com.github.gschrader.gw'
+version = gitVersion()
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'info.picocli:picocli:4.3.0'
+    annotationProcessor 'info.picocli:picocli-codegen:4.3.0'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+
+nativeImage {
+    graalVmHome = System.getProperty('java.home')
+    mainClass = 'com.github.gschrader.gw.App'
+    executableName = 'gw'
+    outputDirectory = file("$buildDir/bin")
+    arguments(
+            '--no-fallback',
+            '--enable-all-security-services',
+            '--initialize-at-run-time=com.github.gschrader.gw',
+            '--report-unsupported-elements-at-runtime',
+            '-H:IncludeResources=version.txt'
+    )
+}
+
+processResources.doLast {
+    def resourcesDir = sourceSets.main.output.resourcesDir
+    resourcesDir.mkdirs()
+
+    new File(resourcesDir, "version.txt").text = version
+}

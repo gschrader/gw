@@ -1,0 +1,95 @@
+name: release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+
+  # This job builds and uploads binary
+  build-ubuntu-mac:
+    name: build and upload release
+    strategy:
+      matrix:
+        os: [macos, ubuntu]
+    runs-on: ${{ matrix.os }}-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v1
+
+      # No need to install normal Java, you can build application only with GraalVM
+      - name: setup GraalVM
+        uses: DeLaGuardo/setup-graalvm@2.0
+        with:
+          graalvm-version: "20.0.0.java11"
+
+      - name: cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: gradle-${{ matrix.os }}-${{ hashFiles('build.gradle') }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-${{ matrix.os }}-
+
+      # Builds native image
+      - name: "build for ${{ matrix.os }}"
+        run: ./gradlew nativeImage
+        env:
+          RUNNING_OS: ${{ matrix.os }}
+          PROJECT_VERSION: ${{ steps.config.outputs.projectVersion }}
+
+      # Uploads binary
+      - name: upload ${{ matrix.os }} image
+        uses: actions/upload-artifact@v2
+        with:
+          name: gw-${{ matrix.os }}
+          path: build/bin/
+
+      - name: "Rename"
+        run: "mv build/bin/gw build/bin/gw-${{ matrix.os }}"
+
+      - name: "Upload Release"
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/bin/gw-${{ matrix.os }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-windows:
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows]
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v1
+
+      - name: setup GraalVM
+        uses: DeLaGuardo/setup-graalvm@2.0
+        with:
+          graalvm-version: "20.0.0.java11"
+
+      - name: Set up Visual C Build Tools Workload for Visual Studio 2017 Build Tools
+        run: |
+          choco install visualstudio2017-workload-vctools
+
+      - name: set env variables and run the Gradle build
+        shell: cmd
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+          ./gradlew nativeImage
+
+      - name: upload ${{ matrix.os }} image
+        uses: actions/upload-artifact@v2
+        with:
+          name: gw-${{ matrix.os }}
+          path: build/bin/
+
+      - name: "Upload Release"
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/bin/gw.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
