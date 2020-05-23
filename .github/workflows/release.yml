@@ -81,15 +81,36 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
           ./gradlew nativeImage
 
+      - name: Install go-msi
+        run: choco install -y "go-msi"
+      - name: Prepare PATH
+        shell: bash
+        run: |
+          echo "::add-path::$WIX\\bin"
+          echo "::add-path::C:\\Program Files\\go-msi"
+      - name: Build MSI
+        id: buildmsi
+        shell: bash
+        run: |
+          mkdir -p "$PWD/build/msi"
+          go-msi make --msi "$PWD/build/bin/gw.msi" --out "$PWD/build/msi" -k -a amd64 --version "${GITHUB_REF#refs/tags/}"
+
       - name: upload ${{ matrix.os }} image
         uses: actions/upload-artifact@v2
         with:
           name: gw-${{ matrix.os }}
           path: build/bin/
 
+#      - uses: actions/upload-artifact@v2
+#        with:
+#          name: workdir
+#          path: "**"
+
       - name: "Upload Release"
         uses: softprops/action-gh-release@v1
         with:
-          files: build/bin/gw.exe
+          files: |
+            build/bin/gw.exe
+            build/bin/gw.msi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,32 @@
+{
+  "product": "gw",
+  "company": "Glen Schrader",
+  "license": "LICENSE",
+  "upgrade-code": "546d4941-1eb2-327e-9352-b570f2c31bd4",
+  "files": {
+    "guid": "22eb7502-6a68-3cdd-afcb-1624b07f726c",
+    "items": [
+      "build/bin/gw.exe"
+    ]
+  },
+  "env": {
+    "guid": "800232cc-1773-35e5-9e3a-84d69bbb1376",
+    "vars": [
+      {
+        "name": "PATH",
+        "value": "[INSTALLDIR]",
+        "permanent": "yes",
+        "system": "no",
+        "action": "set",
+        "part": "last"
+      }
+    ]
+  },
+  "shortcuts": {},
+  "choco": {
+    "description": "A gradlew/gradle wrapper.",
+    "project-url": "https://github.com/gschrader/gw",
+    "tags": "gradle gradlew gw",
+    "license-url": "https://github.com/gschrader/gw/blob/master/LICENSE"
+  }
+}

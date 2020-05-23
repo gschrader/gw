@@ -15,7 +15,7 @@ A Java version of [gdub](https://github.com/dougborg/gdub) so it can be used on 
 
 ## Installation
 
-Download from [releases](https://github.com/gschrader/gw/releases) and add to your path.
+Download exe from [releases](https://github.com/gschrader/gw/releases) and add to your path, or install the MSI which will install and add to your path for you.
 
 ## FAQ
 
