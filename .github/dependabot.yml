@@ -1,0 +1,15 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "12:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: org.mikeneck.graalvm-native-image
+    versions:
+    - 1.2.0
+  - dependency-name: junit:junit
+    versions:
+    - 4.13.1
